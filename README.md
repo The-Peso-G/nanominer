@@ -1,5 +1,5 @@
 # nanominer by nanopool
-# version: 1.3
+# version: 1.9
 # Table of Contents
 1. [Reporting bugs and technical support](#reporting-bugs-and-technical-support)
 1. [Dev fee](#dev-fee)
@@ -12,15 +12,13 @@
 1. [Launching from command line](#launching-from-command-line)
 1. [Examples of Configuration Files](#examples-of-configuration-files)
 
-**nanominer** is a program product developed by nanopool to create structural cryptocurrency units on the framework of the Ethash, Ubqhash, CryptoNight (v6, v7, v8, CryptoNightR, Reverse Waltz), Cuckaroo29 and RandomHash algorithms. The present version of **nanominer** was made to work with every cryptocurrency based on these algorithms, including Ethereum, Ethereum Classic, QuarkChain, Ubiq, Monero, Graft, PascalCoin, GrinCoin and many others. This version of **nanominer** runs on Windows or Linux with AMD or Nvidia graphics cards with the following exceptions:
-* Cuckaroo29 algorithm is supported only on AMD cards with 8+ GB of memory.
-* The RandomHash algorithm is supported only on CPU.
+**nanominer** is a program product developed by nanopool to create structural cryptocurrency units on the framework of the Ethash, KawPow, Ubqhash, Cuckaroo30, RandomX and RandomHash2 algorithms. The present version of **nanominer** was made to work with every cryptocurrency based on these algorithms, including Ethereum, Ethereum Classic, QuarkChain, Ubiq, Monero, Pascal, Cortex, Ravencoin and many others. This version of **nanominer** runs on Windows or Linux with AMD or Nvidia graphics cards (with the exception of RandomX and RandomHash2 algorithms which are supported only on CPU). Cuckaroo30 algorithm is only supported on AMD Radeon RX 570 16 GB GPU. Ravencoin's KawPow algorithm is only supported on AMD GPUs, Nvidia support to follow.
 
 In order to work with Nvidia GPUs **nanominer** needs Nvidia driver **410.48 and newer on Linux** or **411.31 and newer on Windows**.
 
 In order to begin mining Ethereum with nanominer, ***it's enough to simply input your wallet*** in the configuration file.
 
-Testing on **nanominer** demonstrated high performance working with Ethereum, Ethereum Classic, QuarkChain, Ubiq, Monero, Graft, PascalCoin, GrinCoin and other currencies. As a result of the research carried out, it was found that **nanominer** performs on par with, and sometimes better than, competing program products. Independently of this, **nanominer** stands out with its high stability and simple setup.
+Testing on **nanominer** demonstrated high performance working with Ethereum, Ethereum Classic, QuarkChain, Ubiq, Monero, Pascal, Cortex and other currencies. As a result of the research carried out, it was found that **nanominer** performs on par with, and sometimes better than, competing program products. Independently of this, **nanominer** stands out with its high stability and simple setup.
 
 ## Reporting bugs and technical support
 For reporting bugs, technical support, feature requests and community discussions feel free to use the following communication channels:
@@ -31,9 +29,11 @@ For reporting bugs, technical support, feature requests and community discussion
 
 ## Dev fee
 Payment for the use of **nanominer** takes the form of a commission from mining to its wallets once per 2 hours of runtime. The commission is:
-- 1% of total mining time for Ethash, Ubqhash and CryptoNight algorithms (72 seconds per 2 hours);
-- 2% for Cuckaroo29 algorithm (144 seconds per 2 hours);
-- 3% for RandomHash on CPU (216 seconds per 2 hours).
+- 1% of total mining time for Ethash and Ubqhash algorithms (72 seconds per 2 hours);
+- 2% for KawPow on GPU (144 seconds per 2 hours);
+- 2% for RandomX on CPU (144 seconds per 2 hours);
+- 5% for RandomHash2 on CPU (180 seconds every hour).
+- 5% for Cuckaroo30 algorithm (360 seconds per 2 hours);
 
 ## Setup
 At launch **nanominer** reads the _config.ini_ setup file from the program's current directory. In order to
@@ -44,7 +44,7 @@ nanominer.exe config_etc.ini
 ```
 When launching with the _-d_ command line option (e.g. `nanominer.exe -d`) the miner displays a list of the devices it detects, including their PCI addresses and their amount of memory. In order to use this function on Windows the program must be launched from the command prompt (cmd).
 
-**nanominer** does not require any pools to be specified in the config file. If a pool (or list of pools) is not specified, **nanominer** will automatically use the pools on [nanopool.org](https://nanopool.org/) corresponding to the chosen cryptocurrency (except for Ubiq).
+**nanominer** does not require any pools to be specified in the config file. If a pool (or list of pools) is not specified, **nanominer** will automatically use the pools on [nanopool.org](https://nanopool.org/) corresponding to the chosen cryptocurrency (except for coins not listed on Nanopool). QuarkChain public full nodes (fullnode.quarkchain.io and fullnode2.quarkchain.io) which are maintained by QuarkChain developers are used by default for QuarkChain.
 
 When **nanominer** starts up it displays the main work information in the console log, including the program’s current version, the name of the rig, the number and type of graphics cards installed and the program’s current settings.
 ## Log Files
@@ -67,12 +67,11 @@ Another function on **nanominer** that improves the miner's automatic functionin
 More detailed information on using these functions can be found in the _Parameters_ section of this file.
 
 ## Parameters
-The settings for **nanominer** can be found in the configuration file with the *.ini extension (_config.ini_ by default). Config file can contain common params and algorithm params (in sections with corresponding algorithm names). Section names can be defined as “Ethash”, “Ubqhash”, “Cuckaroo29”, “CryptoNightR”, “CryptoNightv8”, “CryptoNightv7”, “CryptoNightReverseWaltz”, “CryptoNight” or “RandomHash”. Configuration file must be in the following format:
-```
+The settings for **nanominer** can be found in the configuration file with the *.ini extension (_config.ini_ by default). Config file can contain common params and algorithm params (in sections with corresponding algorithm names). Section names can be defined as “Ethash”, “KawPow”, “Ubqhash”, “Cuckaroo30”, “RandomX” or “RandomHash2”. Configuration file must be in the following format:
+```ini
 commonparameter1=commonvalue1
 commonparameter2=commonvalue2
 commonparameterX=commonvalueX
-...
 
 [AlgoName1]
 devices=0,1
@@ -80,7 +79,6 @@ wallet = wallet1
 algoparameter1=algovalue1_1
 algoparameter2=algovalue1_2
 algoparameterY=algovalue1_Y
-...
 
 [AlgoName2]
 devices=2,3
@@ -92,7 +90,6 @@ algoparameterZ=algovalue2_Z
 [AlgoName3]
 devices=4,5
 wallet = wallet3
-...
 ```
 More config examples can be found below.
 
@@ -104,24 +101,27 @@ Mandatory parameter.
 This is the user's wallet, where funds will be deposited.
 ### paymentId
 Optional algorithm parameter, can be defined for wallets created on an exchange where the user has a personal
-payment number in addition to their wallet.
+payment number in addition to their wallet. Currently used only for Pascal.
 ### coin
 Optional algorithm parameter.
 This chooses the default coin for the pool. The default pool is [nanopool.org](https://nanopool.org/).
-The coin parameter accepts one of three values: ETH (or Ethereum), ETC (or Ethereum Classic), QKC (or QuarkChain), UBQ (or Ubiq), XMR (or Monero), GRIN (or GrinCoin), PASC (or PascalCoin). When a coin is specified and equals one of the values mentioned above, **nanominer** automatically tries to determine the pool necessary for it to function if none have been provided in a separate parameter. If a coin is specified but **nanominer** cannot recognize it, then the name of the coin is used only for logging. If a coin is not specified, **nanominer** will use the default coin for the corresponding algorithm (Ethereum or Monero). Moreover, if [nanopool.org](https://nanopool.org/) is specified in the configuration file for Ethereum, Ethereum Classic, Monero or GrinCoin, **nanominer** will determine the coin from the pool's settings.
+The coin parameter accepts one of the following values: ETH (or Ethereum), ETC (or Ethereum Classic), RVN (or Raven), QKC (or QuarkChain), UBQ (or Ubiq), XMR (or Monero), CTXC (or Cortex), PASC (or Pascal). When a coin is specified and equals one of the values mentioned above, **nanominer** automatically tries to determine the pool necessary for it to function if none have been provided in a separate parameter. If a coin is specified but **nanominer** cannot recognize it, then the name of the coin is used only for logging. If a coin is not specified, **nanominer** will use the default coin for the corresponding algorithm. Moreover, if [nanopool.org](https://nanopool.org/) is specified in the configuration file for Ethereum, Ethereum Classic or Monero, **nanominer** will determine the coin from the pool's settings.
 
 *Important*: when using **nanominer** to mine Ethereum Classic on the default pool, it is necessary to define the coin (coin=ETC). In that case the pools will be determined automatically.
 
 If the pools are clearly defined with the aid of the _pool1, pool2, ..._, parameters, then **nanominer** will function according to the tasks it receives from those pools.
 ### rigName
 Optional algorithm parameter. Can be specified in common parameter section instead of the algorithm section to be applied for all algorithms at once.
-This is the name of the rig (computer/worker). It will be displayed in the pool's statistics. If this parameter is not set, the program will generate a unique name and provide it to the pool.
+This is the name of the rig (computer/worker). It will be displayed in the pool's statistics. If this parameter is not set, the program will generate a unique name and provide it to the pool. To disable rigname completely just set it to empty string with
+```ini
+rigName=
+```
 ### email
 Optional algorithm parameter. Can be specified in common parameter section instead of the algorithm section to be applied for all algorithms at once.
 This is the user’s e-mail address. It is provided to the pool where the rig will be operating. The pool can use it when sending out service notifications.
 ### pool1, pool2, ...
 Optional algorithm parameter.
-This defines the set of mining pools used. Values must be given in the format url:port (e.g. `pool1=eth-eu1.nanopool.org:9999`). The parameters should be defined in ascending, sequential order, from pool1 to poolN (for example: pool1, pool2, pool3). If the pool list is provided, the best pool will be chosen from the order of the pool list. If a `sortPools=true` option is specified, the best pool will be chosen by the connection speed. If the pool (or list of pools) is not defined, **nanominer** will automatically use the pools on [nanopool.org](https://nanopool.org/) that correspond to the chosen cryptocurrency.
+This defines the set of mining pools used. Values must be given in the format url:port (e.g. `pool1=eth-eu1.nanopool.org:9999`). The parameters should be defined in ascending, sequential order, from pool1 to poolN (for example: pool1, pool2, pool3). If the pool list is provided, the best pool will be chosen from the order of the pool list. If a `sortPools=true` option is specified, the best pool will be chosen by the connection speed. If the pool (or list of pools) is not defined, **nanominer** will automatically use the pools on [nanopool.org](https://nanopool.org/) that correspond to the chosen cryptocurrency. For QuarkChain public full nodes are used if no pools are defined. For Ubiq [Ubiqpool.io](https://ubiqpool.io) pools are used if no pools are defined.
 
 ### protocol
 Optional algorithm parameter.
@@ -132,7 +132,7 @@ Optional algorithm parameter.
 The password for the rig (or worker). It may be necessary when working with pools that require registration and setting a rig password.
 ### watchdog
 Optional common parameter.
-This parameter manages the miner's restart function when running into critical GPU errors or lag. It accepts the values _true_ or _false_. By default, _true_ – automatic restart - is activated.
+This parameter manages the miner's restart function when running into critical GPU errors or lag. It accepts the values _true_ or _false_. By default, _true_ – automatic restart – is activated.
 ### minHashrate
 Optional algorithm parameter.
 This is the minimum acceptable hashrate. This function keeps track of the rig's total hashrate and compares it with this parameter. If five minutes after the miner is launched the set minimum is not reached, **nanominer** will automatically restart. Likewise, the miner will restart if for any reason the average hashrate over a ten-minute period falls below the set value. This value can be set with an optional modifier letter that represents a thousand for kilohash or a million for megahash per second. For example, setting the value to 100 megahashes per second can be written as 100M, 100.0M, 100m, 100000k, 100000K or 100000000. If this parameter is not defined, the miner will not restart (with the exception of the situations described in the _watchdog_ section).
@@ -143,11 +143,11 @@ These are the graphics cards that will be used by the miner. If you do not want 
 nanominer -d
 ```
 For example, if there are four GPUs in the system (0, 1, 2, 3) and all but the second-to-last one (indexed as 2) must be set to mine, then the devices option must be set in the following manner:
-```
+```ini
 devices=0,1,3
 ```
 The order of devices determines the order of displayed hashrate. For example, if it is set as
-```
+```ini
 devices=3,1,0
 ``` 
 then the hashrate line will first display GPU3, then GPU1 and finally GPU0.
@@ -176,21 +176,42 @@ To run reboot script instead of restarting miner every time a critical error occ
 
 ### coreClocks, memClocks
 Optional common parameters.
-Can be used to overclock/underclock NVIDIA GPU's. Absolute (e.g. 4200) as well as relative (e.g. +200, -150) values in MHz are accepted. The values must be separated by a comma or space (first value is for GPU0, second is for GPU1, and so on). For example, if it is set as
-```
+Can be used to overclock/underclock NVIDIA GPU's. Absolute (e.g. 4200) as well as relative (e.g. +200, -150) values in MHz are accepted. Parameter values must be separated by a comma or space (first value is for GPU0, second is for GPU1, and so on). For example, if it is set as
+```ini
 coreClocks=+200,-150
 memClocks=+300,3900
 ```
 then GPU0 will be overclocked by 200 MHz of core and 300 MHz of memory, whereas GPU1 core clock will be underclocked by 150 MHz, and its memory clock set to 3900 MHz.
-You can also apply same settings for each GPU by defining only one of the core and memory clock values, for example:
-```
+You can also apply same settings for each GPU by defining only one core and memory clock value, for example:
+```ini
 coreClocks=+200
 memClocks=+300
 ```
 
 ### powerLimits
 Optional common parameter.
-Can be used to set Nvidia cards power limits from -50 to 50. For example, -20 means 80% power limit, 10 means 110% power limit. The values must be separated by a comma or space (first value is for GPU0, second is for GPU1, and so on). You can also apply same settings for each GPU by defining only one of the power limit value.
+Can be used to set Nvidia cards power limits from -50 to 50. For example, -20 means 80% power limit, 10 means 110% power limit. Parameter values must be separated by a comma or space (first value is for GPU0, second is for GPU1, and so on). You can also apply same settings for each GPU by defining only one power limit value.
+
+### memTweak
+Optional common parameter.
+Can be set to modify AMD GPU timings on the fly for Ethash algorithm. The following AMD ASICs are currently supported: gfx900, gfx901, gfx906, gfx907, Baffin, Ellesmere, gfx804, Hawaii, Tahiti, Pitcairn, Tonga.
+
+Miner must be launched using admin/root privileges in order to change timings.
+
+Default memory tweak value is 1 which means slightly improving memory timings. Zero value means timings are left as is without modifications. Parameter values must be separated by a comma or space (first value is for GPU0, second is for GPU1, and so on). Supported memory tweak value range is from 0 to 10 (0 means disabling timings modification, 1 is the least intense, 10 is the most intense), for example:
+```ini
+memTweak=9,8,10
+```
+It is recommended to begin from lower values and increase them if the miner works stably.
+
+You can also apply same settings for each GPU by defining only one memory tweak value:
+```ini
+memTweak=10
+```
+
+### epoch
+Optional algorithm parameter.
+Ethash algorithm specific option to check miner behaviour on different Ethash epochs.
 
 ### noLog
 Optional common parameter.
@@ -225,6 +246,10 @@ Default value: -3333 (This means that the miner blocks management through API an
 Optional common parameter.
 Your password for monitoring with EthMan and other utilities that support the same network API.
 
+### useSSL
+Optional common parameter.
+This parameter accepts the values _true_ or _false_ (the default is _true_). If this parameter is set to _true_ then miner always tries to use SSL pool connection first and fallbacks to unencrypted connection if SSL connection failed. If this parameter is set to _false_ then miner doesn't try using SSL for pool connection.
+
 ### shardId
 Optional algorithm parameter.
 Can be used to set a shard ID for QuarkChain solo mining. This parameter should be specified in hex, e.g. 0x1, 0x10001, 0x10002, 0x50001, etc. For root chain shard ID `null` must be specified. For more information on shards, visit [this](https://github.com/QuarkChain/pyquarkchain/wiki/Address,-Shard-Key,-Chain-Id,-Shard-Id) and [this](https://github.com/quarkChain/pyquarkchain/releases/latest) link. Default shard ID is 0x1. Shard ID is passed to QuarkChain node "as is" so all current and future Ethash shards are supported.
@@ -246,13 +271,13 @@ Optional algorithm parameter for Ethash and Ubqhash algorithms. This parameter a
 
 ## Configuration File
 The minimum configuration file for Ethereum may contain only a wallet:
-```
+```ini
 wallet=<wallet>
 ```
 **nanominer** will automatically use Ethereum pools.
 
 To work with Ethereum Classic, the coin must be specified:
-```
+```ini
 wallet=<wallet>
 coin=ETC
 ```
@@ -262,20 +287,20 @@ In this case **nanominer** will use pools corresponding to Ethereum Classic.
 For coins that are not supported by [nanopool.org](https://nanopool.org/), **you must** specify a **wallet** and pools (**pool1...**).
 
 ## Launching from command line
-A batch/shell file can be created to launch **nanominer** with command line arguments. This file must call the <i>cmdline_launcher</i> script (<i>cmdline_launcher.bat</i> on Windows, <i>cmdline_launcher.sh</i> on Linux), which converts the command line into a config called <i>config_cmdline.ini</i> and launches the miner with it. At least one algorithm and wallet must be passed to the <i>cmdline_launcher</i> script. All common config parameters in the command line must be specified before the first "algo" parameter. Here are some examples of command lines for launching Ethereum and PascalCoin:
+The best way to configure nanominer is using simple config file. For those who need to run a single command line for some reason there are scripts to do so in *helper_scripts* folder. A batch/shell file can be created to launch **nanominer** with command line arguments. This file must call the <i>cmdline_launcher</i> script (<i>cmdline_launcher.bat</i> on Windows, <i>cmdline_launcher.sh</i> on Linux), which converts the command line into a config called <i>config_cmdline.ini</i> and launches the miner with it. At least one algorithm and wallet must be passed to the <i>cmdline_launcher</i> script. All common config parameters in the command line must be specified before the first "algo" parameter. Here are some examples of command lines for launching Ethereum and Pascal:
 
 Windows:
 ```
-cmdline_launcher -algo ethash -wallet YOUR_ETH_WALLET -coin eth -rigName YOUR_ETH_WORKER -email YOUR_EMAIL -algo randomhash -wallet YOUR_PASC_WALLET -coin pasc -rigName YOUR_PASC_WORKER -email YOUR_EMAIL 
+cmdline_launcher -algo ethash -wallet YOUR_ETH_WALLET -coin eth -rigName YOUR_ETH_WORKER -email YOUR_EMAIL -algo randomhash2 -wallet YOUR_PASC_WALLET -coin pasc -rigName YOUR_PASC_WORKER -email YOUR_EMAIL 
 ```
 Linux:
 ```
-./cmdline_launcher.sh -algo ethash -wallet YOUR_ETH_WALLET -coin eth -rigName YOUR_ETH_WORKER -email YOUR_EMAIL -algo randomhash -wallet YOUR_PASC_WALLET -coin pasc -rigName YOUR_PASC_WORKER -email YOUR_EMAIL 
+./cmdline_launcher.sh -algo ethash -wallet YOUR_ETH_WALLET -coin eth -rigName YOUR_ETH_WORKER -email YOUR_EMAIL -algo randomhash2 -wallet YOUR_PASC_WALLET -coin pasc -rigName YOUR_PASC_WORKER -email YOUR_EMAIL 
 ```
 
 ## Examples of Configuration Files
-Example of a configuration file for Ethereum and PascalCoin:
-```
+Example of a configuration file for Ethereum and Pascal:
+```ini
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
@@ -287,7 +312,7 @@ pool4 = eth-us-west1.nanopool.org:9999
 pool5 = eth-asia1.nanopool.org:9999
 pool6 = eth-jp1.nanopool.org:9999
 pool7 = eth-au1.nanopool.org:9999
-[RandomHash]
+[RandomHash2]
 wallet = 123456-77
 paymentId = ffffffffffffffff
 rigName = rig1
@@ -299,7 +324,7 @@ pool4 = pasc-us-west1.nanopool.org:15556
 pool5 = pasc-asia1.nanopool.org:15556
 ```
 Example of a configuration file for Ethereum:
-```
+```ini
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
@@ -313,19 +338,19 @@ pool6 = eth-jp1.nanopool.org:9999
 pool7 = eth-au1.nanopool.org:9999
 ```
 Example of an equivalent file for Ethereum:
-```
+```ini
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
 email = someemail@org
 ```
 Example of a minimum file for Ethereum:
-```
+```ini
 [Ethash]
 wallet=0xffffffffffffffffffffffffffffffffffffffff
 ```
 Example of a configuration file for Ethereum Classic:
-```
+```ini
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 coin=Etc
@@ -340,7 +365,7 @@ pool6 = etc-jp1.nanopool.org:19999
 pool7 = etc-au1.nanopool.org:19999
 ```
 Example of an equivalent file for Ethereum Classic:
-```
+```ini
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 coin=Etc
@@ -348,15 +373,15 @@ rigName = rig1
 email = someemail@org
 ```
 Example of a minimum file for Ethereum Classic:
-```
+```ini
 [Ethash]
 wallet=0xffffffffffffffffffffffffffffffffffffffff
 coin=Etc
 ```
 Example of a complete configuration file for solo QuarkChain mining:
-```
+```ini
 [Ethash]
-wallet=0 ;placeholder wallet for solo mining
+wallet=0xffffffffffffffffffffffffffffffffffffffff
 shardId=0x30001
 farmRecheck=200
 coin=Qkc
@@ -364,43 +389,48 @@ pool1=localhost:38391
 protocol=getwork
 ```
 Example of a minimum file for solo QuarkChain mining:
-```
+```ini
 [Ethash]
-wallet=0 ;placeholder wallet for solo mining
+wallet=0xffffffffffffffffffffffffffffffffffffffff
 coin=Qkc
 pool1=localhost:38391
 shardId=0x50001
 ```
 Example of a file for solo QuarkChain mining on root shard:
-```
+```ini
 [Ethash]
-wallet=0 ;placeholder wallet for solo mining
+wallet=0xffffffffffffffffffffffffffffffffffffffff
 coin=Qkc
 pool1=localhost:38391
 shardId=null
 ```
-Example of a configuration file for Ubiq:
+Example of a minimum file for QuarkChain mining using public nodes:
+```ini
+[Ethash]
+wallet=0xffffffffffffffffffffffffffffffffffffffff
+coin=Qkc
+shardId=0x30001
 ```
+
+Example of a configuration file for Ubiq:
+```ini
 [Ubqhash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 coin=Ubq
 rigName = rig1
 email = someemail@org
-pool1 = ubiq-eu.maxhash.org:8008
-pool2 = ubiq-us.maxhash.org:8008
-pool3 = ubiq-as.maxhash.org:8008
+pool1 = us.ubiqpool.io:8008
+pool2 = eu.ubiqpool.io:8008
 ```
 Example of a minimum file for Ubiq:
-```
-[Ubqhash]
+```ini
+coin=UBQ
 wallet=0xffffffffffffffffffffffffffffffffffffffff
-pool1 = ubiq-eu.maxhash.org:8008
 ```
 Example of a complete file for Monero:
-```
-[CryptoNightR]
+```ini
+[RandomX]
 wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-paymentId = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
 email = someemail@org
 pool1 = xmr-eu1.nanopool.org:14433
@@ -410,70 +440,31 @@ pool4 = xmr-us-west1.nanopool.org:14433
 pool5 = xmr-asia1.nanopool.org:14433
 ```
 Example of an equivalent file for Monero:
-```
-[CryptoNightR]
+```ini
+[RandomX]
 wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-paymentId = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
 email = someemail@org
 ```
 Example of a minimum file for Monero:
-```
-[CryptoNightR]
+```ini
+[RandomX]
 wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ```
-Example of a complete file for Graft:
-```
-[CryptoNightReverseWaltz]
-wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-paymentId = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+
+Example of a complete file for Cortex:
+```ini
+[Cuckaroo30]
+wallet = 0xffffffffffffffffffffffffffffffffffffffff
 rigName = rig1
-email = someemail@org
-pool1=pool.graft.hashvault.pro:5555 
+pool1=eu.frostypool.com:8008
+pool2=us.frostypool.com:8008
+pool3=asia.frostypool.com:8008
+sortPools=true
 ```
-Example of an equivalent file for Graft:
-```
-[CryptoNightReverseWaltz]
-wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-paymentId = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-rigName = rig1
-email = someemail@org
-pool1=pool.graft.hashvault.pro:5555
-```
-Example of a minimum file for Graft:
-```
-[CryptoNightReverseWaltz]
-wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-pool1=pool.graft.hashvault.pro:5555
-```
-**Nanopool uses UIDs for GrinCoin instead of wallets. To create an UID, visit [grin29.nanopool.org].**
-Example of a complete file for GrinCoin on nanopool:
-```
-[Cuckaroo29]
-wallet = mtfupx6jlmu8e17o
-rigName = rig1
-email = someemail@org
-pool1 = grin29-eu1.nanopool.org:12111
-pool2 = grin29-eu2.nanopool.org:12111
-pool3 = grin29-us-east1.nanopool.org:12111
-pool4 = grin29-us-west1.nanopool.org:12111
-pool5 = grin29-asia1.nanopool.org:12111
-```
-Example of an equivalent file for GrinCoin:
-```
-[Cuckaroo29]
-wallet = mtfupx6jlmu8e17o
-rigName = rig1
-email = someemail@org
-```
-Example of a minimum file for GrinCoin:
-```
-[Cuckaroo29]
-wallet = mtfupx6jlmu8e17o
-```
-Example of a complete file for PascalCoin:
-```
-[RandomHash]
+Example of a complete file for Pascal:
+```ini
+[RandomHash2]
 wallet = 123456-77
 paymentId = ffffffffffffffff
 rigName = rig1
@@ -484,42 +475,63 @@ pool3 = pasc-us-east1.nanopool.org:15556
 pool4 = pasc-us-west1.nanopool.org:15556
 pool5 = pasc-asia1.nanopool.org:15556
 ```
-Example of an equivalent file for PascalCoin:
-```
-[RandomHash]
+Example of an equivalent file for Pascal:
+```ini
+[RandomHash2]
 wallet = 123456-77
 paymentId = ffffffffffffffff
 rigName = rig1
 email = someemail@org
 ```
-Example of a minimum file for PascalCoin:
-```
-[RandomHash]
+Example of a minimum file for Pascal:
+```ini
+[RandomHash2]
 wallet = 123456-77
 ```
 
 
-To mine PascalCoin in a solo mode please provide ip and port of Pascal Coin Wallet software. The wallet number filled in config does not matter in such case. Block payload would be "Miner Name" set up in Pascal Coin Wallet followed by nanominer version. Example of a file for solo mining PascalCoin using local wallet software:
-```
+To mine Pascal in a solo mode please provide ip and port of Pascal full node Wallet software. The wallet number filled in config does not matter in such case. Block payload would be "Miner Name" set up in Pascal full node Wallet followed by nanominer version. Example of a file for solo mining Pascal using local wallet software:
+```ini
 wallet = 0
 pool1 = 127.0.0.1:4009
 ```
 
-Example of configuration file for mining Ethereum, Monero, Ubiq and PascalCoin on same 8 GPUs rig using separate devices:
+Example of a configuration file for Ravencoin:
+```ini
+[Kawpow]
+wallet = Rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+coin=Rvn
+rigName = rig1
+email = someemail@org
+pool1 = rvn-eu1.nanopool.org:12433
+pool2 = rvn-eu2.nanopool.org:12433
+pool3 = rvn-us-east1.nanopool.org:12433
+pool4 = rvn-us-west1.nanopool.org:12433
+pool5 = rvn-asia1.nanopool.org:12433
+pool6 = rvn-jp1.nanopool.org:12433
+pool7 = rvn-au1.nanopool.org:12433
 
 ```
+Example of a minimum file for Ravencoin:
+```ini
+wallet=Rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+```
+
+Example of configuration file for mining Ethereum, Cortex, Ubiq and Pascal on same 8 GPUs rig using separate devices:
+
+```ini
 rigName = rig1
 [Ethash]
 wallet = 0xffffffffffffffffffffffffffffffffffffffff
 devices = 0,1
-[CryptoNightR]
-wallet = fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-paymentId = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+[Cuckaroo30]
+wallet = 0xffffffffffffffffffffffffffffffffffffffff
 devices = 5
+pool1=eu.frostypool.com:8008
 [Ubqhash]
 wallet = 0x1111111111111111111111111111111111111111
-pool1 = ubiq-eu.maxhash.org:8008
+pool1 = eu.ubiqpool.io:8008
 devices = 2,3,4,6,7
-[RandomHash]
+[RandomHash2]
 wallet=123456-77
 ```
